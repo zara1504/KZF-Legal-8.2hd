@@ -46,6 +46,14 @@ app.use(passport.initialize());
 // Serve Static Files on http://localhost:PORT/ (your public folder)
 app.use(express.static(path.join(__dirname, "../public")));
 
+// 8.2HD student info API endpoint
+app.get("/api/student", (req, res) => {
+  res.json({
+    name: "Zara Danziger",
+    studentId: "s223468285"
+  });
+});
+
 // API routes
 app.use("/api", routes);
 

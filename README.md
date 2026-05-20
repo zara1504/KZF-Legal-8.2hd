@@ -1,171 +1,109 @@
-# KFZ-Legal
-KZF Legal — an AI powered legal guidance platform
-helping immigrants navigate the Australian immigration system.
+## Docker Setup (8.2HD — Individual Task READ ME FILE / SET UP)
 
-## Expected Folder Structure
+This section documents how to run the fully containerised version of the KFZ-Legal application using Docker.
 
-This is the current baseline structure and will evolve over time as features are added.
+---
 
-```text
-public/
-    index.html
-  css/
-    styles.css
-  js/
-    app.js
-    chat.js
-    upload.js
-    socket.js
+### 1. Clone the Repository
 
-server/
-  app.js
-  server.js
-  config/
-    env.js
-    database.js
-    passport.js
-  models/
-    User.js
-    Chat.js
-    Message.js
-    Document.js
-  controllers/
-    authController.js
-    chatController.js
-    documentController.js
-  services/
-    authService.js
-    chatService.js
-    documentService.js
-  routes/
-    index.js
-    adminRoutes.js
-    authRoutes.js
-    chatRoutes.js
-    documentRoutes.js
-    healthRoutes.js
-  middleware/
-    authenticateSocket.js
-    validateRequest.js
-    errorHandler.js
-    notFound.js
-    requireAuth.js
-    requireAdmin.js
-    upload.js
-  validators/
-    authValidator.js
-    chatValidator.js
-    docValidator.js
-  utils/
-    logger.js
-    seed.js
+```bash
+git clone https://github.com/zaradanziger/KZF-Legal-8.2hd.git
+cd KZF-Legal-8.2hd
+```
+(This is my individual fork of the group task)
 
-rag/
-  chunker.js
-  embedder.js
-  vectorStore.js
-  webRetriever.js
-  contextBuilder.js
-  pipeline.js
+---
 
-tests/
-  public/
-  rag/
-  server/
-    auth.test.js
-    health.test.js
-    middleware.test.js
-    notFound.test.js
-    helpers/
-      mockAuth.js
+### 2. Environment Configuration (Required)
+
+This application requires a `.env` file in the root directory containing sensitive API keys and configuration values. This file is **not committed to the repository** for security reasons.
+
+**Step 1:** Copy the provided example file to create your `.env`:
+
+```bash
+cp .env.example .env
 ```
 
-## Tech Stack
+**Step 2:** Open the `.env` file and fill in the secret values.
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Authentication:** Passport
-- **Database:** MongoDB (Mongoose)
+The actual secret values (API keys, JWT secret) are provided in the **OnTrack submission 8.2hd pdf**. Copy them exactly as provided into your `.env` file.
 
-## Getting Started
+Your completed `.env` file should contain the following keys:
+THEY ARE IN THE 8.2HD TASK SUBMISSION PDF
 
-### Prerequisites
+---
 
-- Node.js v20 or higher
-- npm v10 or higher
-- MongoDB instance
+### 3. Build and Start the Application
 
-### Installation
+From the root of the project, run:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/kryscodeless/KZF-Legal.git
-   cd KFZ-Legal
-   ```
+```bash
+docker compose up --build
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+This command will:
+- Build the Node.js application image
+- Pull and start a MongoDB container
+- Start the Express server on port 3000
+- Connect the app to MongoDB automatically
 
-3. Copy the .env.example to .env
+Wait until you see the following in the logs:
+MongoDB connected under URI: mongodb://mongo:27017/kfz-legal
+Server running on port 3000
 
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+---
 
-5. Verify the server is running:
-   ```bash
-   curl http://localhost:3000/api/health
-   ```
+### 4. Access the Application
 
-## Frontend
+Once running, open your browser and navigate to:
 
-The frontend is a vanilla HTML/CSS/JavaScript application served from the `public/` folder.
+| URL | Description |
+|-----|-------------|
+| `http://localhost:3000` | Main application frontend |
+| `http://localhost:3000/api/health` | Health check endpoint |
+| `http://localhost:3000/api/student` | Student identification endpoint |
 
-### Pages
+---
 
-| Page | File | Description |
-|------|------|-------------|
-| Login / Register | `index.html` | Authentication screens for signing in or creating an account. Connects to `/api/login-page` and `/api/register-page`. |
-| Home | `index.html` | Dashboard shown after login. Displays a greeting, quick ask box, recent conversations, and shortcuts to other pages. |
-| Chat | `index.html` | Main AI conversation interface. Messages are sent to the backend via Socket.io and responses are rendered with citation badges. |
-| Upload | `index.html` | Drag and drop document upload page. Accepts PDF, DOC, and DOCX files up to 10MB. Connects to `/api/upload-page`. |
-| History | `index.html` | Lists all past conversation sessions with search and date filtering. Supports resume and delete actions. |
+### 5. Student Identification Endpoint
 
-### Frontend Files 
+As required by the 8.2HD task, the following endpoint identifies this submission:
 
-| File | Description |
-|------|-------------|
-| `public/css/styles.css` | All styling design tokens, layout, components. |
-| `public/js/chat.js` | Handles message rendering, typing indicator, suggestion chips, and session title updates. |
-| `public/js/socket.js` | Manages the Socket.io connection. Authenticates with the session token from login and listens for `chat:response` events. |
-| `public/js/upload.js` | Handles drag and drop, client-side file validation (type, size, duplicates), and upload progress UI. |
-| `public/js/app.js` | Handles main functionality of the app flow states. |
+**GET** `http://localhost:3000/api/student`
 
-### Socket Events
+Expected response:
+```json
+{
+  "name": "Zara Danziger",
+  "studentId": "s223468285"
+}
+```
 
-| Direction | Event | Payload |
-|-----------|-------|---------|
-| Server → Client | `chat:response` | `{ messageId, answer, citations?, sessionId? }` |
-| Server → Client | `chat:error` | `{ messageId, message, sessionId? }` |
-| Server → Client | `document:updated` | `{ documentId, status, filename?, chatId? }` |
+---
 
-### API Endpoints (Frontend → Backend)
+### 6. Stopping the Application
 
-| Method | Endpoint | Used by |
-|--------|----------|---------|
-| `POST` | `/api/auth/login` | Login form (`app.js`) |
-| `POST` | `/api/auth/register` | Register form (`app.js`) |
-| `POST` | `/api/auth/logout` | Logout (`app.js`) |
+To stop and remove the containers:
 
-| `POST` | `/api/chat` | Send message (`chat.js`) |
+```bash
+docker compose down
+```
 
-| `POST` | `/api/documents/upload` | Upload file (`upload.js`) |
-| `GET` | `/api/documents` | Load documents page (`app.js`) |
-| `DELETE` | `/api/documents/:id` | Delete document (`app.js` + upload chip removal) |
+To also remove the stored database volume:
 
-| `GET` | `/api/history` | Load chat history (`app.js`) |
-| `GET` | `/api/history/:chatId` | Load single conversation (`resumeSession`) |
-| `DELETE` | `/api/history/:chatId` | Delete conversation (`app.js`) |
+```bash
+docker compose down -v
+```
+
+---
+
+### Architecture Overview
+
+The Dockerised application consists of two containers managed by Docker Compose:
+
+| Container | Image | Port |
+|-----------|-------|------|
+| `app` | Custom Node.js 22 image | 3000 |
+| `mongo` | `mongo:6` | 27017 |
+
+The app container waits for MongoDB to pass a health check before starting, ensuring reliable database connectivity.
