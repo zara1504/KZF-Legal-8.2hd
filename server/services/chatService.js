@@ -90,6 +90,7 @@ const processQuery = async (query, messageId, userId, documentIds, io) => {
     // If there's an error during processing, update the message status to "failed" and emit a failed event to the client.
     if (config.NODE_ENV !== "test") {
       logger.error(`processQuery error for messageId ${messageId}:`, err);
+      console.log("Error:", err);
     }
     try {
       await Message.findByIdAndUpdate(
